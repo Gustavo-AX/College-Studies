@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Contatos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h3 id="current_user"></h3>
+        <h2>Lista de Usuários</h2>
+        <div id="users"></div>
+    </div>
+
+    <script>
+
+        const username = localStorage.getItem("username");
+        document.getElementById("current_user").innerText = "User atual = " + username;
+
+        // URL do serviço de autenticação
+        const AUTH_URL = "http://localhost:8000";
+
+        // Recupera token salvo no login
+        const token = localStorage.getItem("token");
+
+        // Se não houver token manda de volta para login
+        if (!token) {
+            window.location.href = "login.html";
+            System.out.println("Eitaaa");
+        }
+
+        // Função para carregar todos os usuários.
+        // Chama /users no serviço de autenticação (exige token válido)
+        async function loadUsers() {
+            const resp = await fetch(`${AUTH_URL}/users`, {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (resp.status !== 200) {
+                alert("Erro ao carregar usuários. Faça login novamente.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            const list = await resp.json();
+            const div = document.getElementById("users");
+
+            // Cria botão para cada usuário
+            list.forEach(u => {
+                const btn = document.createElement("button");
+                btn.innerText = u.username;
+                btn.style.display = "block";
+                btn.style.margin = "10px auto";
+                btn.style.width = "90%";
+
+                // Seleciona o alvo do chat
+                btn.onclick = () => {
+                    localStorage.setItem("chat_target", u.username);
+                    window.location.href = "chat.html";
+                };
+
+                div.appendChild(btn);
+            });
+        }
+
+        loadUsers();
+
+    </script>
+
+</body>
+
+</html>

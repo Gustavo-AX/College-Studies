@@ -1,0 +1,36 @@
+Nomes: Gustavo de Assis e Thiago Ribeiro
+
+Atenção, cada .env tem o link para uma base de dados, esses são
+para o MEU computador, você terá que criar uma base de dados no 
+seu computador e atualizar tanto o link como as senhas nesse arquivo.
+O link para baixar o sistema de banco de dados é:
+https://www.postgresql.org/
+
+Você pode entrar no aplicativo pgadmin 4 que é instalado junto a ele para
+acessar o gerenciador de bancos.
+
+Rode o canal global do chat:
+    py -m uvicorn main:app --reload --host 0.0.0.0 --port 9000
+
+Para rodar, na pasta authentication abra um terminal e execute:
+    py -m uvicorn main:app --reload --port 8000
+
+Na pasta chat execute (aqui estamos criando 3 servidores de chat, você que escolhe quanto você quer):
+    py -m uvicorn main:app --reload --port 8001
+    py -m uvicorn main:app --reload --port 8002
+    py -m uvicorn main:app --reload --port 8003
+
+Por fim, na pasta front execute (estou criando 3 servidores web, um para cada cliente):
+    py -m uvicorn balancer:app --reload --port 9001
+    py -m http.server 5500
+    py -m http.server 5501
+    py -m http.server 5502
+Um para cada instância.
+
+Neste documento também há um .bat que é para rodar todos esse comandos de forma sequêncial no windows.
+
+Então, pode acessar:
+http://127.0.0.1:5500/login.html
+http://127.0.0.1:5501/login.html
+http://127.0.0.1:5502/login.html
+

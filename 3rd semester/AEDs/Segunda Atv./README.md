@@ -1,0 +1,1 @@
+Este código realiza a decomposição aditiva de um número inteiro positivo. Ou seja, ele gera todas as formas possíveis de representar um número como soma de inteiros positivos, imprimindo cada decomposição.

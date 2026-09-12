@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Login / Registro</h2>
+
+        <input id="username" placeholder="Usuário"><br>
+        <input id="password" type="password" placeholder="Senha"><br>
+
+        <button onclick="login()">Entrar</button>
+        <button onclick="registerUser()">Registrar</button>
+    </div>
+
+    <script>
+
+        // Endereço do serviço de autenticação
+        const AUTH_URL = "http://localhost:8000";
+
+        // LOGIN
+        // Envia username e password para /login
+        // Se estiver tudo certo, salva token e o username e vai para lista de usuários
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (!username || !password) {
+                alert("Preencha os campos.");
+                return;
+            }
+
+            // Faz requisição POST para /login
+            const resp = await fetch(`${AUTH_URL}/login`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!resp.ok) {
+                alert("Usuário ou senha incorretos.");
+                return;
+            }
+
+            // Resposta contém o token
+            const data = await resp.json();
+
+            // Armazena token e nome do usuário no navegador
+            localStorage.setItem("token", data.access_token);
+            localStorage.setItem("username", username);
+
+            // Redireciona para lista de usuários
+            window.location.href = "users_list.html";
+        }
+
+
+
+        // REGISTRO
+        // Envia username e password para /register
+        async function registerUser() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (!username || !password) {
+                alert("Preencha os campos.");
+                return;
+            }
+
+            const resp = await fetch(`${AUTH_URL}/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert("Erro ao registrar: " + err.detail);
+                return;
+            }
+
+            alert("Usuário registrado! Agora faça login.");
+        }
+
+    </script>
+
+</body>
+
+</html>

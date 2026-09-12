@@ -1,0 +1,14 @@
+<code> 	::= {<macros>}
+<macros> 	::= #define|#undef|#error|#include|#ifdef|#ifndef|#if
+<#define> 	::= #define <name> [ <expr> ]
+<#undef> 	::= #undef <name>
+<#error> 	::= #error <expr>	
+<#include> 	::= #include (  <expr> | ('<' <name> '>'))
+<#ifdef> 	::= #ifdef <name> <macros> [#elif(s) | #else] #endif
+<#ifndef> 	::= #ifndef <name> <macros> [#elif(s) | #else] #endif
+<#if> 	::= #if [!] #defined <name> <macros> [ #elif(s) | #else] #endif
+<#elif> 	::= [!] #defined <name> <macro> [#elif(s) | #else] 
+<#else>	::= <macro> 
+
+//lembrando que um expr pode ser um inteiro ou uma string
+

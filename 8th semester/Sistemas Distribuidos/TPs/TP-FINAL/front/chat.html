@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+        <h3 id="current_user"></h3>
+        <h2>Chat</h2>
+        <div><b>Conversando com: </b><span id="chatWith"></span></div>
+        <br>
+        <div id="history"></div>
+        <br>
+        <input id="msg" placeholder="Mensagem">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+
+    <script>
+
+        const username_actual = localStorage.getItem("username");
+        document.getElementById("current_user").innerText = "User atual = " + username_actual;
+
+        let CHAT_URL;
+        let WS_URL;
+        let token;
+        let username;
+        let target;
+        let ws;
+
+        async function init() {
+            // 1) Pega o servidor via load balancer
+            const balancerResp = await fetch("http://localhost:9001/choose");
+            const choice = await balancerResp.json();
+
+            CHAT_URL = choice.http_url;
+            WS_URL = choice.ws_url;
+
+            // 2) Carrega login
+            token = localStorage.getItem("token");
+            username = localStorage.getItem("username");
+            target = localStorage.getItem("chat_target");
+
+            if (!token || !username || !target) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            document.getElementById("chatWith").innerText = target;
+
+            await loadHistory();
+            startWS();
+        }
+
+        // Carrega o histórico de mensagens:
+        // Chama o histórico com o user em específco no serviço de chat
+        async function loadHistory() {
+            const resp = await fetch(`${CHAT_URL}/history/${target}`, {
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            const hist = await resp.json();
+            const div = document.getElementById("history");
+
+            // Coloca cada mensagem na tela
+            hist.forEach(m => {
+                div.innerHTML += `<p><b>${m.sender}:</b> ${m.content}</p>`;
+            });
+        }
+
+        // WebSocket
+        // Conecta em /ws passando o token
+        function startWS() {
+            ws = new WebSocket(`${WS_URL}/ws?token=` + token);
+
+            ws.onopen = () => {
+                console.log("WS conectado");
+
+                ws.send(JSON.stringify({
+                    type: "join",
+                    me: username,
+                    talking_to: target
+                }));
+
+                // Habilitar se quiser mensagens automáticas:
+                // startAutoMessages();
+            };
+
+            // Recebendo mensagens
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                const div = document.getElementById("history");
+                div.innerHTML += `<p><b>${msg.sender}:</b> ${msg.content}</p>`;
+            };
+
+            ws.onclose = () => {
+                alert("A conexão com o servidor foi perdida. Você será desconectado.");
+                window.location.href = "login.html";
+            };
+
+            ws.onerror = () => {
+                alert("Erro na comunicação com o servidor. Voltando ao login.");
+                window.location.href = "login.html";
+            };
+
+
+        }
+
+        // Enviar mensagem
+        // Manda um JSON através do websocket
+        function sendMessage() {
+            const content = document.getElementById("msg").value;
+
+            if (!content) return;
+
+            // Envia JSON
+            ws.send(JSON.stringify({
+                receiver: target,
+                content: content
+            }));
+
+            // Já manda essa para tela também
+            const div = document.getElementById("history");
+            div.innerHTML += `<p><b>${username}:</b> ${content}</p>`;
+
+            document.getElementById("msg").value = "";
+        }
+
+        init();
+
+        // Envio automático de mensagens para teste de carga
+        let autoCounter = 1;
+
+        function startAutoMessages() {
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+
+                    const content = String(autoCounter);
+
+                    ws.send(JSON.stringify({
+                        receiver: target,
+                        content: content
+                    }));
+
+                    // mostrar na tela também
+                    const div = document.getElementById("history");
+                    div.innerHTML += `<p><b>${username} (auto):</b> ${content}</p>`;
+
+                    autoCounter++;
+                }
+            }, 5000); // 5 segundos
+        }
+    </script>
+
+</body>
+
+</html>

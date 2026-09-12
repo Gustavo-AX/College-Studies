@@ -1,0 +1,1 @@
+Este código parece ser uma tentativa de resolver o problema da mochila (Knapsack Problem), onde o objetivo é escolher os melhores itens para colocar em uma mochila, maximizando o valor total sem exceder a capacidade da mochila.

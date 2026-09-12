@@ -1,0 +1,6 @@
+Lista de Requisitos
+Diagrama de Atividade (modelo atual)
+Diagrama de Atividade (modelo de solução)
+Lista identificando os pontos de melhoria propostos
+Diagrama de Casos de Uso de contexto (modelo de solução com as melhorias propostas)
+Especificação de 2 casos de uso. 
